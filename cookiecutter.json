@@ -1,0 +1,19 @@
+{
+    "templates": {
+        "agentlayer": {
+            "path": "./agentlayer",
+            "title": "Agent Layer",
+            "description": "A cookiecutter template for an agent layer"
+        },
+        "llmlayer": {
+            "path": "./llmlayer",
+            "title": "LLM Layer",
+            "description": "A cookiecutter template for an llm layer"
+        },
+        "toollayer": {
+            "path": "./toollayer",
+            "title": "Tool Layer",
+            "description": "A cookiecutter template for an tool layer"
+        }
+    }
+}
