@@ -7,5 +7,6 @@ class AbstractTool(BaseModel):
 
     async def prepare(self, query: str):
         pass
+    
 
     
