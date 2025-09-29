@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from app.gen.tool.{{cookiecutter.too.uid | aiurnimport}}.tool import BaseTool
+from app.gen.tool.{{cookiecutter.tool.uid | aiurnimport}}.tool import BaseTool
 class CustomTool(BaseTool):
    
     async def call(self, query: str):
