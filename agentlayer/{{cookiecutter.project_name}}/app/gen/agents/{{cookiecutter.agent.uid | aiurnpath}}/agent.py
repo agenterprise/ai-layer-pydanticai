@@ -21,11 +21,11 @@ class BaseAgent(AbstractAgent):
     async def get_tools(self):
 
         for ref in self.toolrefs:
-            if ref not in self.toolregistry.registrys:
+            if ref not in self.toolregistry.registry:
                 logger.error(f"Tool {ref} not found in toolregistry")
                 raise ValueError(f"Tool {ref} not found in toolregistry")
         
-        basetools = [self.toolregistry.registrys[ref] for ref in self.toolrefs]
+        basetools = [self.toolregistry.registry[ref] for ref in self.toolrefs]
         tools = [t.as_tool() for t in basetools]
         return tools
     
@@ -34,7 +34,7 @@ class BaseAgent(AbstractAgent):
         agent = Agent(  
             model=self.modelregistry.registry[self.llmref],
             instructions=self.systemprompt,  
-            tools=self.get_tools()
+            tools=await self.get_tools()
         )
         result = await agent.run(f"{query}")
         return result 
