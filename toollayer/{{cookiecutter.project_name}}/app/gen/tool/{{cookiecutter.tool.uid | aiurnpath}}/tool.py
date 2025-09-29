@@ -14,3 +14,6 @@ class BaseTool(AbstractTool):
 
     async def call(self, query: str):
         return query 
+    
+
+{{cookiecutter.tool.uid | aiurnvar}} = BaseTool()
