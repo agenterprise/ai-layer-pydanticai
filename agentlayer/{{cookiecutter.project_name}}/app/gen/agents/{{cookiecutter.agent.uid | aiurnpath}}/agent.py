@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from pydantic_ai import Agent
 from app.gen.domainmodel.agent import AbstractAgent
 from app.gen.domainmodel.modelregistry import BaseModelregistry
-from app.gen.domainmodel.toolregistry import BaseModelregistry
+from app.gen.domainmodel.toolregistry import BaseToolregistry
 
 
 class BaseAgent(AbstractAgent):
