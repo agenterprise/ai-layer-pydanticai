@@ -8,6 +8,7 @@ class AIURNExtension(Extension):
         super(AIURNExtension,self).__init__(environment)
         environment.filters['aiurnpath'] = lambda v: os.path.join(*v.split(':')[2:])
         environment.filters['aiurnvar'] = lambda v: '_'.join(v.split(':')[2:]).replace('-', '_')
+        environment.filters['aiurnimport'] = lambda v:'.'.join(v.split(':')[2:])
 
 """
 @simple_filter
