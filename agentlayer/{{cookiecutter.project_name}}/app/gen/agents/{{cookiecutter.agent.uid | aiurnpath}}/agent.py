@@ -34,7 +34,7 @@ class BaseAgent(AbstractAgent):
         agent = Agent(  
             model=self.modelregistry.registry[self.llmref],
             instructions=self.systemprompt,  
-            tools=self.get_tools
+            tools=self.get_tools()
         )
         result = await agent.run(f"{query}")
         return result 
