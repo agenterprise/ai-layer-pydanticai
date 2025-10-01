@@ -1,16 +1,19 @@
-from typing import Dict, Optional
+from pydantic import ConfigDict
+from pydantic_ai.models.openai import OpenAIChatModel as SelectedModel
+from pydantic_ai.models import Model, ModelSettings
 
-from pydantic import BaseModel, ConfigDict
-from pydantic_ai.models.openai import OpenAIChatModel, AsyncOpenAI
-from pydantic_ai.models import Model, Provider, ModelSettings
-from pydantic_ai.providers.azure import AzureProvider
-from pydantic.dataclasses import dataclass
 from app.gen.config.llm_settings import LLMSetting
-from app.gen.domainmodel.aimodel.model import AbstractLanguageModel
+from app.gen.domainmodel.model import AbstractLanguageModel
+
+{% if cookiecutter.llm.provider == "aiurn:model:provider:azure" %}
+from pydantic_ai.providers.azure import AzureProvider as SelectedProvider
+{% else %}
+from pydantic_ai.providers.openai import OpenAIProvider as SelectedProvider
+{% endif %}
 
 settings = LLMSetting()
 class BaseLanguageModel(AbstractLanguageModel):
-    model: Model = None
+    model: SelectedModel = None
     settings: LLMSetting = settings
 
     {% for key, value in cookiecutter.llm.properties.items() %}
@@ -19,33 +22,29 @@ class BaseLanguageModel(AbstractLanguageModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     async def get_model(self) -> Model:
-         return OpenAIChatModel(
+         return SelectedModel(
                 self.settings.{{cookiecutter.llm.uid | aiurnvar}}_model_name,
                 provider = await self.get_provider(),
                 settings = await self.get_setting()
             )
     
-    async def get_provider(self) -> Provider:
-        {% if cookiecutter.llm.provider == "aiurn:provider:azure" %}
-            return AzureProvider(
+    async def get_provider(self) -> SelectedProvider:
+       
+            return SelectedProvider(
                 azure_endpoint=settings.{{cookiecutter.llm.uid | aiurnvar}}_endpoint,
                 api_version=settings.{{cookiecutter.llm.uid | aiurnvar}}_version,
                 api_key=settings.{{cookiecutter.llm.uid | aiurnvar}}_api_key
                 )
-        {% endif %}
-    
+           
     async def get_setting(self) -> ModelSettings:
          return ModelSettings(temperature=0.7, max_tokens=1000)
 
-{{cookiecutter.llm.uid | aiurnvar }} = OpenAIChatModel(
+{{cookiecutter.llm.uid | aiurnvar }} = SelectedModel(
                 settings.{{cookiecutter.llm.uid | aiurnvar}}_model_name,
-                {% if cookiecutter.llm.provider == "aiurn:provider:azure" %}
-                provider=AzureProvider(
+                provider=SelectedProvider(
                     azure_endpoint=settings.{{cookiecutter.llm.uid | aiurnvar}}_endpoint,
                     api_version=settings.{{cookiecutter.llm.uid | aiurnvar}}_version,
-                    api_key=settings.{{cookiecutter.llm.uid | aiurnvar}}_api_key,
-
+                    api_key=settings.{{cookiecutter.llm.uid | aiurnvar}}_api_key
                 )
-                {% endif %}
             )
 
