@@ -4,11 +4,11 @@ from app.gen.domainmodel.tool import AbstractTool
 
 class BaseTool(AbstractTool):
 
-    description: str = "{{ cookiecutter.tool.description }}"
-    {% for key, value in cookiecutter.tool.properties.items() %}
-    {{ key | aiurnvar }}:str = "{{ value }}"
-    {% endfor %}
-
+    description: str = {{ cookiecutter.tool.description }}
+    properties:dict = {
+        {% for key, value in cookiecutter.tool.properties.items() %}"{{ key | aiurnvar }}" : {{ value }} , {% endfor %}
+    }
+   
     async def prepare(self, query: str):
         return query 
 
@@ -17,7 +17,7 @@ class BaseTool(AbstractTool):
     
     def as_tool(self):
         from pydantic_ai import Tool
-        return Tool(self.call, name="{{ cookiecutter.tool.name }}", description=self.description)
+        return Tool(self.call, name={{ cookiecutter.tool.name }}, description=self.description)
     
 
 {{cookiecutter.tool.uid | aiurnvar}} = BaseTool()
