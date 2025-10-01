@@ -1,44 +1,45 @@
 import logging
-from typing import List
-from pydantic import BaseModel
-from pydantic_ai import Agent, Tool
+from pydantic_ai import Agent, FunctionToolset
 from app.gen.domainmodel.agent import AbstractAgent
-from app.gen.domainmodel.modelregistry import BaseModelregistry
-from app.gen.domainmodel.toolregistry import BaseToolregistry
 from app.gen.domainmodel.model import AbstractLanguageModel
+from app.gen.domainmodel.tool import AbstractTool
 
 
 logger = logging.getLogger(__name__)
 
 class BaseAgent(AbstractAgent):
-    toolregistry: BaseToolregistry
+    """Base class for agents."""
     systemprompt: str = {{ cookiecutter.agent.systemprompt }}
+   
+    """ LLM reference """
+    llmref:str = "{{ cookiecutter.agent.llmref }}"
+    llmmodel:AbstractLanguageModel = None
+
+    """Tool references"""
+    {% for ref in cookiecutter.agent.toolrefs %}
+    {{ ref | aiurnvar }}: AbstractTool
+    {% endfor %} 
+
+    """ Agent properties """
     properties:dict = {
         {% for key, value in cookiecutter.agent.properties.items() %}"{{ key | aiurnvar }}" : {{ value }} , {% endfor %}
     }
-  
-    llmref:str = "{{ cookiecutter.agent.llmref }}"
-    toolrefs:List = [{% for ref in cookiecutter.agent.toolrefs %}"{{ ref }}", {% endfor %} ]
-    llmmodel:AbstractLanguageModel = None
-    
+
+    """ Internal pydantic agent instance """
     _agent:Agent = None
 
-    async def get_tools(self):
-
-        for ref in self.toolrefs:
-            if ref not in self.toolregistry.registry:
-                logger.error(f"Tool {ref} not found in toolregistry")
-                raise ValueError(f"Tool {ref} not found in toolregistry")
-        
-        basetools = [self.toolregistry.registry[ref] for ref in self.toolrefs]
-        tools = [t.as_tool() for t in basetools]
-        return tools
+    async def _get_toolset(self):
+        """Get the toolset for the agent."""
+        tools = [{% for ref in cookiecutter.agent.toolrefs %}self.{{ ref | aiurnvar }}.as_tool(),{% endfor %}]
+        toolset = FunctionToolset(tools=tools)
+        return toolset
     
     async def _get_agent(self):
+        """Get the agent instance."""
         self._agent = self._agent or Agent(  
             model=await self.llmmodel.get_model(),
             instructions=self.systemprompt,  
-            tools=await self.get_tools()
+            toolsets=[await self._get_toolset()]
         )
         return self._agent
     
