@@ -25,14 +25,15 @@ class BaseTool(AbstractTool):
         {% endif %}   
         pass
     
-    def as_tool(self):
+    async def as_tool(self):
 
         """Convert to a pydantic-ai Tool."""
         {% if cookiecutter.tool.type == "aiurn:tooltype:mcp" %}
         from pydantic_ai.mcp import MCPServerStreamableHTTP
         mcpServer =  MCPServerStreamableHTTP({{cookiecutter.tool.endpoint}})
-        mcpServer.log_handler = logger.handlers[0]
-        mcpServer.log_level=logger.level
+        await mcpServer.__aenter__()
+        mcpServer.log_handler = logger.parent.handlers[0]
+        mcpServer.log_level=logger.parent.level
         return mcpServer
         {% elif cookiecutter.tool.type == "aiurn:tooltype:code" %}     
         #return Tool(self.call, name={{ cookiecutter.tool.name }}, description=self.description)
