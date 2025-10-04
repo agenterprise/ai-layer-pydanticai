@@ -42,9 +42,9 @@ class BaseAgent(AbstractAgent):
             if tool.type==ToolType.MCP:
                 mcptool = await tool.as_tool()
                 if mcptool.is_running:
-                    toolsets.append(tool.as_tool())
+                    toolsets.append(mcptool)
                 else:
-                    logger.warning(f"MCP Tool {tool} is not running. Not recognized in toolset.")
+                    logger.warning(f"MCP Tool {tool} / {tool.endpoint} is not running. Not recognized in toolset.")
 
         return toolsets
     
