@@ -18,6 +18,8 @@ class AbstractTool(BaseModel):
     async def prepare(self, query: str):
         pass
 
+class MCPNotAvailableException(Exception):
+    pass
 
 
     

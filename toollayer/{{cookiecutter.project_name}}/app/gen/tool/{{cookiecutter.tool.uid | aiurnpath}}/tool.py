@@ -1,6 +1,6 @@
 import logging
 from pydantic_ai import Tool, RunContext
-from app.gen.domainmodel.tool import AbstractTool, ToolType
+from app.gen.domainmodel.tool import AbstractTool, ToolType, MCPNotAvailableException
 logger = logging.getLogger(__name__)
 
 
@@ -29,12 +29,16 @@ class BaseTool(AbstractTool):
 
         """Convert to a pydantic-ai Tool."""
         {% if cookiecutter.tool.type == "aiurn:tooltype:mcp" %}
-        from pydantic_ai.mcp import MCPServerStreamableHTTP
-        mcpServer =  MCPServerStreamableHTTP({{cookiecutter.tool.endpoint}})
-        await mcpServer.__aenter__()
-        mcpServer.log_handler = logger.parent.handlers[0]
-        mcpServer.log_level=logger.parent.level
-        return mcpServer
+        try:
+            from pydantic_ai.mcp import MCPServerStreamableHTTP
+            mcpServer =  MCPServerStreamableHTTP({{cookiecutter.tool.endpoint}})
+            await mcpServer.__aenter__()
+            mcpServer.log_handler = logger.parent.handlers[0]
+            mcpServer.log_level=logger.parent.level
+            return mcpServer
+        except Exception as e:
+            logger.error("Error initializing MCP Server at {{cookiecutter.tool.endpoint}}")
+            raise MCPNotAvailableException("Error initializing MCP Server at {{cookiecutter.tool.endpoint}}")
         {% elif cookiecutter.tool.type == "aiurn:tooltype:code" %}     
         #return Tool(self.call, name={{ cookiecutter.tool.name }}, description=self.description)
         return  Tool.from_schema(
