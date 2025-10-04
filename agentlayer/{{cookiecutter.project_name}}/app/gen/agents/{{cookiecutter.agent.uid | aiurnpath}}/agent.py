@@ -2,7 +2,7 @@ import logging
 from pydantic_ai import Agent, FunctionToolset
 from app.gen.domainmodel.agent import AbstractAgent
 from app.gen.domainmodel.model import AbstractLanguageModel
-from app.gen.domainmodel.tool import AbstractTool, ToolType
+from app.gen.domainmodel.tool import AbstractTool, ToolType, MCPNotAvailableException
 from fastapi import  HTTPException
  
 
@@ -40,11 +40,13 @@ class BaseAgent(AbstractAgent):
 
         for tool in alltools:
             if tool.type==ToolType.MCP:
-                mcptool = await tool.as_tool()
+                try:
+                    mcptool = await tool.as_tool()
+                except MCPNotAvailableException:
+                    logger.warning(f"MCP Tool {tool} / {tool.endpoint} is not running. Not recognized in toolset.")
                 if mcptool.is_running:
                     toolsets.append(mcptool)
-                else:
-                    logger.warning(f"MCP Tool {tool} / {tool.endpoint} is not running. Not recognized in toolset.")
+       
 
         return toolsets
     
