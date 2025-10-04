@@ -1,5 +1,7 @@
+import logging
 from pydantic_ai import Tool, RunContext
 from app.gen.domainmodel.tool import AbstractTool, ToolType
+logger = logging.getLogger(__name__)
 
 
 class BaseTool(AbstractTool):
@@ -28,7 +30,10 @@ class BaseTool(AbstractTool):
         """Convert to a pydantic-ai Tool."""
         {% if cookiecutter.tool.type == "aiurn:tooltype:mcp" %}
         from pydantic_ai.mcp import MCPServerStreamableHTTP
-        return MCPServerStreamableHTTP({{cookiecutter.tool.endpoint}})
+        mcpServer =  MCPServerStreamableHTTP({{cookiecutter.tool.endpoint}})
+        mcpServer.log_handler = logger.handlers[0]
+        mcpServer.log_level=logger.level
+        return mcpServer
         {% elif cookiecutter.tool.type == "aiurn:tooltype:code" %}     
         #return Tool(self.call, name={{ cookiecutter.tool.name }}, description=self.description)
         return  Tool.from_schema(
