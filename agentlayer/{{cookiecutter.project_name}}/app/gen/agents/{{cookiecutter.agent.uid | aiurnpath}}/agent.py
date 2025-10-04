@@ -43,7 +43,7 @@ class BaseAgent(AbstractAgent):
                 try:
                     mcptool = await tool.as_tool()
                 except MCPNotAvailableException:
-                    logger.warning(f"MCP Tool {tool} / {tool.endpoint} is not running. Not recognized in toolset.")
+                    logger.warning(f"MCP Tool {tool} is not running. Not recognized in toolset.")
                 if mcptool.is_running:
                     toolsets.append(mcptool)
        

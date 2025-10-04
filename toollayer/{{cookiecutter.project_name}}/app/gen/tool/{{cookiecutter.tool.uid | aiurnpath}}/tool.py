@@ -40,7 +40,7 @@ class BaseTool(AbstractTool):
             endpoint = {{cookiecutter.tool.endpoint}}
             error = f"Error initializing MCP Server at {endpoint}."
             logger.error(error)
-            logger(e)
+            logger.error(e)
             raise MCPNotAvailableException(error)
         {% elif cookiecutter.tool.type == "aiurn:tooltype:code" %}     
         #return Tool(self.call, name={{ cookiecutter.tool.name }}, description=self.description)
