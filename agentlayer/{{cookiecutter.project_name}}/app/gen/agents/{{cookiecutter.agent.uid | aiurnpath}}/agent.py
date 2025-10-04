@@ -34,13 +34,13 @@ class BaseAgent(AbstractAgent):
         """Get the toolset for the agent."""
         toolsets = []
         alltools = [{% for ref in cookiecutter.agent.toolrefs %}self.{{ ref | aiurnvar }},{% endfor %}]
-        functiontools = [tool.as_tool() for tool in alltools if tool.type!=ToolType.MCP]     
+        functiontools = [await tool.as_tool() for tool in alltools if tool.type!=ToolType.MCP]     
         functionaltoolset = FunctionToolset(tools=functiontools)
         toolsets.append(functionaltoolset)
 
         for tool in alltools:
             if tool.type==ToolType.MCP:
-                mcptool = tool.as_tool()
+                mcptool = await tool.as_tool()
                 if mcptool.is_running:
                     toolsets.append(tool.as_tool())
                 else:
