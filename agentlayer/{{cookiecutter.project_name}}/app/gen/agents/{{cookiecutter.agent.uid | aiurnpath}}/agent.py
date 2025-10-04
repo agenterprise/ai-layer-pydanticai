@@ -2,7 +2,7 @@ import logging
 from pydantic_ai import Agent, FunctionToolset
 from app.gen.domainmodel.agent import AbstractAgent
 from app.gen.domainmodel.model import AbstractLanguageModel
-from app.gen.domainmodel.tool import AbstractTool
+from app.gen.domainmodel.tool import AbstractTool, ToolType
 
 
 logger = logging.getLogger(__name__)
@@ -28,18 +28,26 @@ class BaseAgent(AbstractAgent):
     """ Internal pydantic agent instance """
     _agent:Agent = None
 
-    async def _get_toolset(self):
+    async def _get_toolsets(self):
         """Get the toolset for the agent."""
-        tools = [{% for ref in cookiecutter.agent.toolrefs %}self.{{ ref | aiurnvar }}.as_tool(),{% endfor %}]
-        toolset = FunctionToolset(tools=tools)
-        return toolset
+        toolsets = []
+        alltools = [{% for ref in cookiecutter.agent.toolrefs %}self.{{ ref | aiurnvar }},{% endfor %}]
+        functiontools = [tool.as_tool() for tool in alltools if tool.type!=ToolType.MCP]     
+        functionaltoolset = FunctionToolset(tools=functiontools)
+        toolsets.append(functionaltoolset)
+
+        for tool in alltools:
+            if tool.type==ToolType.MCP:
+                toolsets.append(tool.as_tool())
+
+        return toolsets
     
     async def _get_agent(self):
         """Get the agent instance."""
         self._agent = self._agent or Agent(  
             model=await self.llmmodel.get_model(),
             instructions=self.systemprompt,  
-            toolsets=[await self._get_toolset()]
+            toolsets=await self._get_toolsets()
         )
         return self._agent
     

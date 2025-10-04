@@ -1,24 +1,53 @@
 from pydantic_ai import Tool, RunContext
-from app.gen.domainmodel.tool import AbstractTool
+from app.gen.domainmodel.tool import AbstractTool, ToolType
+
 
 class BaseTool(AbstractTool):
     """Base class for tools. Can be extended for custom behavior at extension layer (see app/ext/tool)."""
     description: str = {{ cookiecutter.tool.description }}
-
+    
     """ Tool properties """
     properties:dict = {
         {% for key, value in cookiecutter.tool.properties.items() %}"{{ key | aiurnvar }}" : {{ value }} , {% endfor %}
     }
-   
+    type: ToolType = ToolType("{{ cookiecutter.tool.type }}")
     async def prepare(self, query: str):
         """Prepare the tool call."""
-        return query 
+        pass
 
-    async def call(self, ctx:RunContext[str], query: str):
+    async def call(self, ctx:RunContext[str],  {% for key in cookiecutter.tool.inputproperties %}{{ key | aiurnvar }}:str , {% endfor %}ç):
         """Call the tool."""
-        return query 
+        {% if cookiecutter.tool.type == "aiurn:tooltype:code" %}
+        function = eval({{ cookiecutter.tool.endpoint }})
+        return function({% for key in cookiecutter.tool.inputproperties %}{{ key | aiurnvar }}, {% endfor %})
+        {% endif %}   
+        pass
     
     def as_tool(self):
+
         """Convert to a pydantic-ai Tool."""
-        return Tool(self.call, name={{ cookiecutter.tool.name }}, description=self.description)
+        {% if cookiecutter.tool.type == "aiurn:tooltype:mcp" %}
+        from pydantic_ai.mcp import MCPServerStreamableHTTP
+        return MCPServerStreamableHTTP({{cookiecutter.tool.endpoint}})
+        {% elif cookiecutter.tool.type == "aiurn:tooltype:code" %}     
+        #return Tool(self.call, name={{ cookiecutter.tool.name }}, description=self.description)
+        return  Tool.from_schema(
+            function=self.call,
+            name={{ cookiecutter.tool.name }},
+            description=self.description,
+            json_schema={
+                'additionalProperties': False,
+                'properties': {
+                    {% for key, value in cookiecutter.tool.inputproperties.items() %}
+                    '{{ key | aiurnvar }}': {'description': '{{ value['description'] | replace('"','')}}', 'type': 'integer'},
+                    {% endfor %}
+                },
+                'required': [{% for key, value in cookiecutter.tool.inputproperties.items() %}'{{ key | aiurnvar }}',{% endfor %}],
+                'type': 'object',
+            },
+            takes_ctx=False,
+)
+        {% else %}
+        raise NotImplementedError("Tool type {{ cookiecutter.tool.type }} not implemented.")
+        {% endif %}
     

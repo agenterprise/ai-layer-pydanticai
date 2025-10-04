@@ -1,4 +1,14 @@
 from pydantic import BaseModel
+import enum
+
+
+class ToolType(str, enum.Enum):
+    CODE = "aiurn:tooltype:code"
+    RESSOURCE = "aiurn:tooltype:ressource"
+    OPENAPI = "aiurn:tooltype:openapi"
+    MCP = "aiurn:tooltype:mcp"
+    CUSTOM = "aiurn:tooltype:custom"
+    
 
 class AbstractTool(BaseModel):
     """Abstract base class for tools."""
@@ -7,6 +17,7 @@ class AbstractTool(BaseModel):
 
     async def prepare(self, query: str):
         pass
-    
+
+
 
     
