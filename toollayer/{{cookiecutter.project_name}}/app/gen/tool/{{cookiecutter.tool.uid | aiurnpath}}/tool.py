@@ -37,8 +37,11 @@ class BaseTool(AbstractTool):
             mcpServer.log_level=logger.parent.level
             return mcpServer
         except Exception as e:
-            logger.error("Error initializing MCP Server at {{cookiecutter.tool.endpoint}}")
-            raise MCPNotAvailableException("Error initializing MCP Server at {{cookiecutter.tool.endpoint}}")
+            endpoint = {{cookiecutter.tool.endpoint}}
+            error = f"Error initializing MCP Server at {endpoint}."
+            logger.error(error)
+            logger(e)
+            raise MCPNotAvailableException(error)
         {% elif cookiecutter.tool.type == "aiurn:tooltype:code" %}     
         #return Tool(self.call, name={{ cookiecutter.tool.name }}, description=self.description)
         return  Tool.from_schema(
