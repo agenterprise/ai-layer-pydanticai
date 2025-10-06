@@ -60,7 +60,7 @@ class BaseAgent(AbstractAgent):
         self._agent = self._agent or Agent(  
             model=await self.llmmodel.get_model(),
             instructions=self.systemprompt,  
-            name=            {{cookiecutter.agent.uid | aiurnvar | capitalize }}Agent
+            name="{{cookiecutter.agent.uid | aiurnvar | capitalize }}Agent",
 
             toolsets=await self._get_toolsets(),
             output_type={{cookiecutter.agent.uid | aiurnvar | capitalize }}AgentResponse
@@ -73,7 +73,7 @@ class BaseAgent(AbstractAgent):
         try:
             agent = await self._get_agent()
             result = await agent.run(f"{query}")
-            return result 
+            return result.output
         except Exception as e:
             import uuid
             errorcode = uuid.uuid4().hex    
