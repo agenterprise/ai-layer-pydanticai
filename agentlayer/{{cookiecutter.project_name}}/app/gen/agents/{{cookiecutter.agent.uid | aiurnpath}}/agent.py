@@ -3,6 +3,7 @@ from pydantic_ai import Agent, FunctionToolset
 from app.gen.domainmodel.agent import AbstractAgent
 from app.gen.domainmodel.model import AbstractLanguageModel
 from app.gen.domainmodel.tool import AbstractTool, ToolType, MCPNotAvailableException
+from app.gen.agents.{{agent.uid | aiurnimport}}.response import {{cookiecutter.agent.uid | aiurnvar | capitalize }}AgentResponse
 from fastapi import  HTTPException
  
 
@@ -59,11 +60,15 @@ class BaseAgent(AbstractAgent):
         self._agent = self._agent or Agent(  
             model=await self.llmmodel.get_model(),
             instructions=self.systemprompt,  
-            toolsets=await self._get_toolsets()
+            name=            {{cookiecutter.agent.uid | aiurnvar | capitalize }}Agent
+
+            toolsets=await self._get_toolsets(),
+            output_type={{cookiecutter.agent.uid | aiurnvar | capitalize }}AgentResponse
+
         )
         return self._agent
     
-    async def ask(self, query: str):
+    async def ask(self, query: str) -> {{cookiecutter.agent.uid | aiurnvar | capitalize }}AgentResponse:
         """Use the agent to answer a question."""
         try:
             agent = await self._get_agent()
