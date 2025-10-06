@@ -3,7 +3,7 @@ from pydantic_ai import Agent, FunctionToolset
 from app.gen.domainmodel.agent import AbstractAgent
 from app.gen.domainmodel.model import AbstractLanguageModel
 from app.gen.domainmodel.tool import AbstractTool, ToolType, MCPNotAvailableException
-from app.gen.agents.{{agent.uid | aiurnimport}}.response import {{cookiecutter.agent.uid | aiurnvar | capitalize }}AgentResponse
+from app.gen.agents.{{cookiecutter.agent.uid | aiurnimport}}.response import {{cookiecutter.agent.uid | aiurnvar | capitalize }}AgentResponse
 from fastapi import  HTTPException
  
 
