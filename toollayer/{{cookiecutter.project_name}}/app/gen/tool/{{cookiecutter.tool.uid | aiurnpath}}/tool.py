@@ -1,8 +1,20 @@
 import logging
 from pydantic_ai import Tool, RunContext
 from app.gen.domainmodel.tool import AbstractTool, ToolType, MCPNotAvailableException
-logger = logging.getLogger(__name__)
+from app.gen.domainmodel.baseentity import BaseInputEntity, BaseOutputEntity
 
+logger = logging.getLogger(__name__)
+{% if cookiecutter.tool.input %}
+from app.gen.entities.{{cookiecutter.tool.input | aiurnimport }}.entity import {{cookiecutter.tool.input | aiurnvar | capitalize }}Entity as ToolInputType
+{% else %}
+type ToolInputType=BaseInputEntity
+{%endif%}
+
+{% if cookiecutter.tool.output %}
+from app.gen.entities.{{cookiecutter.tool.output | aiurnimport }}.entity import {{cookiecutter.tool.output | aiurnvar | capitalize }}Entity as ToolOutputType
+{% else %}
+type ToolOutputType=BaseOutputEntity
+{%endif%}
 
 class BaseTool(AbstractTool):
     """Base class for tools. Can be extended for custom behavior at extension layer (see app/ext/tool)."""
@@ -13,17 +25,16 @@ class BaseTool(AbstractTool):
         {% for key, value in cookiecutter.tool.properties.items() %}"{{ key | aiurnvar }}" : {{ value }} , {% endfor %}
     }
     type: ToolType = ToolType("{{ cookiecutter.tool.type }}")
-    async def prepare(self, query: str):
-        """Prepare the tool call."""
-        pass
-
-    async def call(self, ctx:RunContext[str],  {% for key in cookiecutter.tool.inputproperties %}{{ key | aiurnvar }}:str , {% endfor %}ç):
+    
+    async def call(self, ctx:RunContext[str], input:ToolInputType):
         """Call the tool."""
         {% if cookiecutter.tool.type == "aiurn:tooltype:code" %}
         function = eval({{ cookiecutter.tool.endpoint }})
-        return function({% for key in cookiecutter.tool.inputproperties %}{{ key | aiurnvar }}, {% endfor %})
-        {% endif %}   
+        return function(input)
+        {%else%}
         pass
+        {% endif %}   
+    
     
     async def as_tool(self):
 
@@ -43,23 +54,7 @@ class BaseTool(AbstractTool):
             logger.error(e)
             raise MCPNotAvailableException(error)
         {% elif cookiecutter.tool.type == "aiurn:tooltype:code" %}     
-        #return Tool(self.call, name={{ cookiecutter.tool.name }}, description=self.description)
-        return  Tool.from_schema(
-            function=self.call,
-            name={{ cookiecutter.tool.name }},
-            description=self.description,
-            json_schema={
-                'additionalProperties': False,
-                'properties': {
-                    {% for key, value in cookiecutter.tool.inputproperties.items() %}
-                    '{{ key | aiurnvar }}': {'description': '{{ value['description'] | replace('"','')}}', 'type': 'integer'},
-                    {% endfor %}
-                },
-                'required': [{% for key, value in cookiecutter.tool.inputproperties.items() %}'{{ key | aiurnvar }}',{% endfor %}],
-                'type': 'object',
-            },
-            takes_ctx=False,
-)
+        return Tool(self.call, name={{ cookiecutter.tool.name }}, description=self.description)
         {% else %}
         raise NotImplementedError("Tool type {{ cookiecutter.tool.type }} not implemented.")
         {% endif %}

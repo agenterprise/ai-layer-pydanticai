@@ -3,7 +3,21 @@ from pydantic_ai import Agent, FunctionToolset
 from app.gen.domainmodel.agent import AbstractAgent
 from app.gen.domainmodel.model import AbstractLanguageModel
 from app.gen.domainmodel.tool import AbstractTool, ToolType, MCPNotAvailableException
-from app.gen.agents.{{cookiecutter.agent.uid | aiurnimport}}.response import {{cookiecutter.agent.uid | aiurnvar | capitalize }}AgentResponse
+from app.gen.domainmodel.baseentity import BaseInputEntity, BaseOutputEntity
+
+{% if cookiecutter.agent.input %}
+from app.gen.entities.{{cookiecutter.agent.input | aiurnimport }}.entity import {{cookiecutter.agent.input | aiurnvar | capitalize }}Entity as InputType
+{% else %}
+type InputType=BaseInputEntity
+{%endif%}
+
+{% if cookiecutter.agent.output %}
+from app.gen.entities.{{cookiecutter.agent.output | aiurnimport }}.entity import {{cookiecutter.agent.output | aiurnvar | capitalize }}Entity as OutputType
+{% else %}
+type OutputType=BaseOutputEntity
+{%endif%}
+
+
 from fastapi import  HTTPException
  
 
@@ -61,18 +75,16 @@ class BaseAgent(AbstractAgent):
             model=await self.llmmodel.get_model(),
             instructions=self.systemprompt,  
             name="{{cookiecutter.agent.uid | aiurnvar | capitalize }}Agent",
-
             toolsets=await self._get_toolsets(),
-            output_type={{cookiecutter.agent.uid | aiurnvar | capitalize }}AgentResponse
-
+            output_type=OutputType
         )
         return self._agent
     
-    async def ask(self, query: str) -> {{cookiecutter.agent.uid | aiurnvar | capitalize }}AgentResponse:
+    async def ask(self, input: InputType) -> OutputType:
         """Use the agent to answer a question."""
         try:
             agent = await self._get_agent()
-            result = await agent.run(f"{query}")
+            result = await agent.run(input.model_dump_json())
             return result.output
         except Exception as e:
             import uuid
