@@ -4,17 +4,17 @@ from app.gen.domainmodel.tool import AbstractTool, ToolType, MCPNotAvailableExce
 from app.gen.domainmodel.baseentity import BaseInputEntity, BaseOutputEntity
 
 logger = logging.getLogger(__name__)
-{% if cookiecutter.tool.input %}
+{%- if cookiecutter.tool.input %}
 from app.gen.entities.{{cookiecutter.tool.input | aiurnimport }}.entity import {{cookiecutter.tool.input | aiurnvar | capitalize }}Entity as ToolInputType
-{% else %}
+{%- else %}
 type ToolInputType=BaseInputEntity
-{%endif%}
+{%-endif%}
 
-{% if cookiecutter.tool.output %}
+{%- if cookiecutter.tool.output %}
 from app.gen.entities.{{cookiecutter.tool.output | aiurnimport }}.entity import {{cookiecutter.tool.output | aiurnvar | capitalize }}Entity as ToolOutputType
-{% else %}
+{%- else %}
 type ToolOutputType=BaseOutputEntity
-{%endif%}
+{%-endif%}
 
 class BaseTool(AbstractTool):
     """Base class for tools. Can be extended for custom behavior at extension layer (see app/ext/tool)."""
@@ -22,24 +22,24 @@ class BaseTool(AbstractTool):
     
     """ Tool properties """
     properties:dict = {
-        {% for key, value in cookiecutter.tool.properties.items() %}"{{ key | aiurnvar }}" : {{ value }} , {% endfor %}
+        {%- for key, value in cookiecutter.tool.properties.items() %}"{{ key | aiurnvar }}" : {{ value }} , {%- endfor %}
     }
     type: ToolType = ToolType("{{ cookiecutter.tool.type }}")
     
-    async def call(self, ctx:RunContext[str], input:ToolInputType):
+    async def call(self, ctx:RunContext[str], input:ToolInputType) -> ToolOutputType:
         """Call the tool."""
-        {% if cookiecutter.tool.type == "aiurn:tooltype:code" %}
+        {%- if cookiecutter.tool.type == "aiurn:tooltype:code" %}
         function = eval({{ cookiecutter.tool.endpoint }})
         return function(input)
-        {%else%}
+        {%- else%}
         pass
-        {% endif %}   
+        {%- endif %}   
     
     
     async def as_tool(self):
 
         """Convert to a pydantic-ai Tool."""
-        {% if cookiecutter.tool.type == "aiurn:tooltype:mcp" %}
+        {%- if cookiecutter.tool.type == "aiurn:tooltype:mcp" %}
         try:
             from pydantic_ai.mcp import MCPServerStreamableHTTP
             mcpServer =  MCPServerStreamableHTTP({{cookiecutter.tool.endpoint}})
@@ -53,9 +53,9 @@ class BaseTool(AbstractTool):
             logger.error(error)
             logger.error(e)
             raise MCPNotAvailableException(error)
-        {% elif cookiecutter.tool.type == "aiurn:tooltype:code" %}     
+        {%- elif cookiecutter.tool.type == "aiurn:tooltype:code" %}     
         return Tool(self.call, name={{ cookiecutter.tool.name }}, description=self.description)
-        {% else %}
+        {%- else %}
         raise NotImplementedError("Tool type {{ cookiecutter.tool.type }} not implemented.")
-        {% endif %}
+        {%- endif %}
     

@@ -5,11 +5,11 @@ from pydantic_ai.models import Model, ModelSettings
 from app.gen.config.settings import LLMSettings
 from app.gen.domainmodel.model import AbstractLanguageModel
 
-{% if cookiecutter.llm.provider == "aiurn:model:provider:azure" %}
+{%- if cookiecutter.llm.provider == "aiurn:model:provider:azure" %}
 from pydantic_ai.providers.azure import AzureProvider as SelectedProvider
-{% else %}
+{%- else %}
 from pydantic_ai.providers.openai import OpenAIProvider as SelectedProvider
-{% endif %}
+{%- endif %}
 
 class BaseLanguageModel(AbstractLanguageModel):
     """Base class for language models."""
@@ -20,7 +20,7 @@ class BaseLanguageModel(AbstractLanguageModel):
 
     """Language model configuration."""
     properties:dict = {
-        {% for key, value in cookiecutter.llm.properties.items() %}"{{ key | aiurnvar }}" : {{ value }} , {% endfor %}
+        {%- for key, value in cookiecutter.llm.properties.items() %}"{{ key | aiurnvar }}" : {{ value }} , {%- endfor %}
     }
 
     """ Allow arbitrary types for provider and model """

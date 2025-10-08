@@ -5,17 +5,17 @@ from app.gen.domainmodel.model import AbstractLanguageModel
 from app.gen.domainmodel.tool import AbstractTool, ToolType, MCPNotAvailableException
 from app.gen.domainmodel.baseentity import BaseInputEntity, BaseOutputEntity
 
-{% if cookiecutter.agent.input %}
+{%- if cookiecutter.agent.input %}
 from app.gen.entities.{{cookiecutter.agent.input | aiurnimport }}.entity import {{cookiecutter.agent.input | aiurnvar | capitalize }}Entity as InputType
-{% else %}
+{%- else %}
 type InputType=BaseInputEntity
-{%endif%}
+{%-endif%}
 
-{% if cookiecutter.agent.output %}
+{%- if cookiecutter.agent.output %}
 from app.gen.entities.{{cookiecutter.agent.output | aiurnimport }}.entity import {{cookiecutter.agent.output | aiurnvar | capitalize }}Entity as OutputType
-{% else %}
+{%- else %}
 type OutputType=BaseOutputEntity
-{%endif%}
+{%-endif%}
 
 
 from fastapi import  HTTPException
@@ -33,13 +33,13 @@ class BaseAgent(AbstractAgent):
     llmmodel:AbstractLanguageModel = None
 
     """Tool references"""
-    {% for ref in cookiecutter.agent.toolrefs %}
+    {%- for ref in cookiecutter.agent.toolrefs %}
     {{ ref | aiurnvar }}: AbstractTool
-    {% endfor %} 
+    {%- endfor %} 
 
     """ Agent properties """
     properties:dict = {
-        {% for key, value in cookiecutter.agent.properties.items() %}"{{ key | aiurnvar }}" : {{ value }} , {% endfor %}
+        {%- for key, value in cookiecutter.agent.properties.items() %}"{{ key | aiurnvar }}" : {{ value }} , {%- endfor %}
     }
 
     """ Internal pydantic agent instance """
@@ -48,7 +48,7 @@ class BaseAgent(AbstractAgent):
     async def _get_toolsets(self):
         """Get the toolset for the agent."""
         toolsets = []
-        alltools = [{% for ref in cookiecutter.agent.toolrefs %}self.{{ ref | aiurnvar }},{% endfor %}]
+        alltools = [{%- for ref in cookiecutter.agent.toolrefs %}self.{{ ref | aiurnvar }},{%- endfor %}]
         functiontools = [await tool.as_tool() for tool in alltools if tool.type!=ToolType.MCP]     
         functionaltoolset = FunctionToolset(tools=functiontools)
         toolsets.append(functionaltoolset)

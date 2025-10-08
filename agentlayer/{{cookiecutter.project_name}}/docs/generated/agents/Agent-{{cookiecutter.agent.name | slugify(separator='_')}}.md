@@ -5,9 +5,9 @@ Overview agent
 {{ cookiecutter.agent.systemprompt }}
 ```
 ### Properties
-{% for key, value in cookiecutter.agent.properties.items() %}
+{%- for key, value in cookiecutter.agent.properties.items() %}
 - **{{ key | aiurnvar }}**: {{ value }}
-{% endfor %}
+{%- endfor %}
 
 
 # Extend
