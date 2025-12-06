@@ -28,7 +28,7 @@ class BaseAgent(AbstractAgent):
     """Base class for agents."""
     systemprompt: str = ""{{ cookiecutter.agent.systemprompt }}""
     agentid: str = "{{cookiecutter.agent.uid | aiurnvar | capitalize }}Agent"
-
+    namespace: str = "{{ cookiecutter.agent.namespace | aiurnpath }}"
    
     """ LLM reference """
     llmref:str = "{{ cookiecutter.agent.llmref }}"
