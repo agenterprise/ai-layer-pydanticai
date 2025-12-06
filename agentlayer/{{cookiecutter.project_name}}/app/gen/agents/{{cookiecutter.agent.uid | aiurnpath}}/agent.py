@@ -27,6 +27,8 @@ logger = logging.getLogger(__name__)
 class BaseAgent(AbstractAgent):
     """Base class for agents."""
     systemprompt: str = ""{{ cookiecutter.agent.systemprompt }}""
+    agentid: str = "{{cookiecutter.agent.uid | aiurnvar | capitalize }}Agent"
+
    
     """ LLM reference """
     llmref:str = "{{ cookiecutter.agent.llmref }}"
