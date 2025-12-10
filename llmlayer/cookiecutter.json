@@ -2,6 +2,7 @@
     "project_name": "{{ cookiecutter.project_name }}",
     "package_name": "{{ cookiecutter.project_name|lower|replace(' ', '_') }}",
     "llm": "{{ cookiecutter.llm }",
+    "llms": "{{ cookiecutter.llms }",
     "project_build_id": "{{ cookiecutter.project_build_id }}",
     "_extensions": [
         "local_extensions.AIURNExtension"],
